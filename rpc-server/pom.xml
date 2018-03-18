@@ -1,0 +1,72 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.crazypig.rpc</groupId>
+		<artifactId>oh-netty-rpc</artifactId>
+		<version>1.0-dev</version>
+	</parent>
+
+	<artifactId>oh-netty-rpc-server</artifactId>
+	<packaging>jar</packaging>
+
+	<name>oh-netty-rpc-server</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.crazypig.rpc</groupId>
+			<artifactId>oh-netty-rpc-registry</artifactId>
+			<version>${parent.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.crazypig.rpc</groupId>
+			<artifactId>oh-netty-rpc-protocol</artifactId>
+			<version>${parent.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.crazypig.rpc</groupId>
+			<artifactId>oh-netty-rpc-demoservice</artifactId>
+			<version>${parent.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>
