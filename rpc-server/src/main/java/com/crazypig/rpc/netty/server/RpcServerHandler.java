@@ -1,12 +1,17 @@
 package com.crazypig.rpc.netty.server;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.crazypig.rpc.netty.protocol.RpcRequest;
 import com.crazypig.rpc.netty.protocol.RpcResponse;
 import com.crazypig.rpc.netty.utils.SpringUtil;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -25,20 +30,53 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
     
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcRequest request) throws Exception {
-        RpcResponse response = new RpcResponse();
-        // 调用真正的service
-        Object result = null;
-        try {
-            result = invoke(request);
-            response.setCode(RpcResponse.SUCCESS_CODE);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            response.setCode(RpcResponse.ERROR_CODE);
-        }
-        response.setResult(result);
-        response.setRequestId(request.getRequestId());
-        // 回写response
-        ctx.channel().writeAndFlush(response);
+        
+        ListeningExecutorService guavaExecutor =
+                ctx.channel().attr(NettyServer.ATTR_BUSINESS_EXECUTOR).get();
+        
+        // 在业务线程池中执行service调用
+        ListenableFuture<RpcResponse> future = guavaExecutor.submit(new Callable<RpcResponse>() {
+
+            @Override
+            public RpcResponse call() throws Exception {
+
+                RpcResponse response = new RpcResponse();
+                // 调用真正的service
+                Object result = null;
+                try {
+                    result = invoke(request);
+                    response.setCode(RpcResponse.SUCCESS_CODE);
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    response.setCode(RpcResponse.ERROR_CODE);
+                }
+                response.setResult(result);
+                response.setRequestId(request.getRequestId());
+
+                return response;
+            }
+
+        });
+        
+        // service执行结束后回调处理
+        Futures.addCallback(future, new FutureCallback<RpcResponse>() {
+
+            @Override
+            public void onSuccess(RpcResponse response) {
+                // 回写response
+                ctx.channel().writeAndFlush(response);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                // 异常也回写response
+                RpcResponse response = new RpcResponse();
+                response.setCode(RpcResponse.ERROR_CODE);
+                response.setRequestId(request.getRequestId());
+                ctx.channel().writeAndFlush(response);
+            }
+        }, guavaExecutor);
+        
     }
     
     private Object invoke(RpcRequest request) throws Exception {
