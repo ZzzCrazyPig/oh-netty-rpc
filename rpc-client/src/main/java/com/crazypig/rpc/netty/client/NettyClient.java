@@ -8,6 +8,13 @@ import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.crazypig.rpc.netty.codec.RpcProtocolDecoder;
+import com.crazypig.rpc.netty.codec.RpcProtocolEncoder;
+import com.crazypig.rpc.netty.protocol.RpcResponse;
+import com.crazypig.rpc.netty.serialize.RpcSerializers;
+import com.crazypig.rpc.netty.serialize.RpcSerializerType;
+import com.crazypig.rpc.netty.serialize.kryo.KryoRpcSerializer;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -30,9 +37,14 @@ public final class NettyClient {
     
     private static Logger logger = LoggerFactory.getLogger(NettyClient.class);
     
+    private final static RpcSerializerType DEFAULT_SERIALIZER_TYPE = RpcSerializerType.KRYO;
+    
     private EventLoopGroup eventLoopGroup;
     private Bootstrap bootstrap;
     private NettyClient _this;
+    
+    // TODO 可配置
+    private RpcSerializerType serializerType = DEFAULT_SERIALIZER_TYPE;
     
     private ConcurrentMap<String, ConcurrentLinkedQueue<RpcConnection>> rpcConnPool;
     
@@ -56,9 +68,9 @@ public final class NettyClient {
 
                 @Override
                 protected void initChannel(Channel ch) throws Exception {
-                    ch.pipeline().addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)))
-                        .addLast(new ObjectEncoder())
-                        .addLast(new RpcClientHandler());
+                    
+                    doInitChannel(ch);
+                    
                 }});
         return this;
     }
@@ -113,6 +125,39 @@ public final class NettyClient {
     
     private String keyOf(String host, int port) {
         return host + ":" + port;
+    }
+    
+    /**
+     * 根据serializerType选择对应的编码器和解码器
+     * @param ch
+     * @throws Exception
+     */
+    private void doInitChannel(Channel ch) throws Exception {
+        switch (serializerType) {
+            case KRYO:
+                ch.pipeline()
+                        .addLast(new RpcProtocolDecoder(RpcResponse.class, RpcSerializers.kryoRpcSerializer))
+                        .addLast(new RpcProtocolEncoder(RpcSerializers.kryoRpcSerializer))
+                        .addLast(new RpcClientHandler());
+                break;
+            case JDK:
+                ch.pipeline()
+                        .addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)))
+                        .addLast(new ObjectEncoder())
+                        .addLast(new RpcClientHandler());
+                break;
+            case PROTOSTUFF:
+                ch.pipeline()
+                        .addLast(new RpcProtocolDecoder(RpcResponse.class, RpcSerializers.protosutffRpcSerializer))
+                        .addLast(new RpcProtocolEncoder(RpcSerializers.protosutffRpcSerializer))
+                        .addLast(new RpcClientHandler());
+                break;
+            default:
+                ch.pipeline()
+                .addLast(new RpcProtocolDecoder(RpcResponse.class, new KryoRpcSerializer()))
+                .addLast(new RpcProtocolEncoder(new KryoRpcSerializer()))
+                .addLast(new RpcClientHandler());
+        }
     }
     
 }
