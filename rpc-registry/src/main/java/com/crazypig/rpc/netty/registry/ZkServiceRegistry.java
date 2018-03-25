@@ -5,6 +5,7 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.curator.utils.EnsurePath;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,10 @@ public class ZkServiceRegistry implements ServiceRegistry {
         // 将地址注册到zk上
         logger.info("will register service address {}:{} to zookeeper path {}", 
                 serverAddress.getHost(), serverAddress.getPort(), basePath);
+        Stat stat = zkClient.checkExists().forPath(getPathOf(serverAddress));
+        if (stat != null) {
+            zkClient.delete().forPath(getPathOf(serverAddress));
+        }
         zkClient.create().withMode(CreateMode.EPHEMERAL).forPath(getPathOf(serverAddress));
     }
 
