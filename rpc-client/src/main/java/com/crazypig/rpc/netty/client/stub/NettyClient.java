@@ -1,4 +1,4 @@
-package com.crazypig.rpc.netty.client;
+package com.crazypig.rpc.netty.client.stub;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;

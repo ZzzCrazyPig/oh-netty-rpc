@@ -9,6 +9,6 @@ public interface HelloService {
     
     public void sayHello(String name);
     
-    public String sayHelloAgain(String name, int num);
+    public String sayHelloAgain(String name, Integer num);
 
 }

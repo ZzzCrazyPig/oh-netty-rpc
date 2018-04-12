@@ -1,4 +1,4 @@
-package com.crazypig.rpc.netty.client;
+package com.crazypig.rpc.netty.client.stub.lb;
 
 import java.util.List;
 

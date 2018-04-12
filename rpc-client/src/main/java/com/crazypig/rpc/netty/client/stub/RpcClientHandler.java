@@ -1,5 +1,6 @@
-package com.crazypig.rpc.netty.client;
+package com.crazypig.rpc.netty.client.stub;
 
+import com.crazypig.rpc.netty.client.stub.async.RpcResponseFuture;
 import com.crazypig.rpc.netty.protocol.RpcResponse;
 
 import io.netty.channel.Channel;

@@ -1,59 +1,62 @@
-package com.crazypig.rpc.netty.client;
+package com.crazypig.rpc.netty.client.stub.async;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.crazypig.rpc.netty.client.stub.RpcConnection;
 import com.crazypig.rpc.netty.protocol.RpcResponse;
+import com.google.common.util.concurrent.AbstractFuture;
 
 /**
  * RPC调用返回结果future
  * @author CrazyPig
  *
  */
-public final class RpcResponseFuture implements Future<RpcResponse> {
+public final class RpcResponseFuture extends AbstractFuture<RpcResponse> {
     
-    private RpcResponse response = null;
-    private final CountDownLatch cdl = new CountDownLatch(1);
-    private boolean done = false;
-    private boolean cancel = false;
-
+    private RpcConnection rpcConn;
+    
+    public RpcResponseFuture(RpcConnection rpcConn) {
+        this.rpcConn = rpcConn;
+    }
+    
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
-        cdl.countDown();
-        cancel = true;
-        return true;
+        try {
+            return super.cancel(mayInterruptIfRunning);
+        } finally {
+            rpcConn.close();
+        }
     }
 
     @Override
     public boolean isCancelled() {
-        return cancel;
+        return super.isCancelled();
     }
 
     @Override
     public boolean isDone() {
-        return done;
+        return super.isDone();
     }
 
     @Override
     public RpcResponse get() throws InterruptedException, ExecutionException {
-        cdl.await();
-        return response;
+        return super.get();
     }
 
     @Override
     public RpcResponse get(long timeout, TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
-        cdl.await(timeout, unit);
-        return response;
+        return super.get(timeout, unit);
     }
     
     public void setDone(RpcResponse response) {
-        this.response = response;
-        cdl.countDown();
-        done = true;
+        try {
+            set(response);
+        } finally {
+            rpcConn.close();
+        }
     }
     
 }

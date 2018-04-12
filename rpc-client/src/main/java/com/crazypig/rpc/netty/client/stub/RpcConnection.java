@@ -1,9 +1,10 @@
-package com.crazypig.rpc.netty.client;
+package com.crazypig.rpc.netty.client.stub;
 
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.crazypig.rpc.netty.client.stub.async.RpcResponseFuture;
 import com.crazypig.rpc.netty.protocol.RpcRequest;
 
 import io.netty.channel.Channel;
@@ -45,7 +46,7 @@ public final class RpcConnection implements Closeable {
      * @return {@link RpcResponseFuture}
      */
     public RpcResponseFuture sendRpcRequest(final RpcRequest request) {
-        RpcResponseFuture rpcRespFuture = new RpcResponseFuture();
+        RpcResponseFuture rpcRespFuture = new RpcResponseFuture(this);
         rpcRespFutureMap.put(request.getRequestId(), rpcRespFuture);
         toServerChannel.writeAndFlush(request).addListener(new ChannelFutureListener() {
             
