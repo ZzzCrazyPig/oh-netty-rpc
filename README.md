@@ -43,7 +43,7 @@ client端想异步调用sayHello方法，则在client端需要新增接口，继
 public interface HelloServiceAsync extends HelloService {
     
     @AsyncRpcMethod(origin = "sayHello", type = AsyncRpcMethodType.CALLBACK)
-    void sayHelloAsync(String name, Callback clientCallback);
+    void sayHelloAsync(String name, RpcInvocationCallback clientCallback);
 
     @AsyncRpcMethod(origin = "sayHello", type =  AsyncRpcMethodType.FUTURE)
     Future sayHelloAsync(String name);
