@@ -13,7 +13,7 @@
 - oh-netty-rpc-demoservice : 用于测试的服务接口，实现类在`oh-netty-rpc-server`模块中，`oh-netty-rpc-client`直接使用该接口进行远程调用
 - oh-netty-rpc-test : 提供一个简单的测试，测试RPC server和RPC client之间的调用（服务注册和服务发现使用zk）
 
-## Futures
+## Features
 
 - 内置使用kryo序列化，同时支持protostuff和原生jdk序列化方式（没有放开配置）
 - 简单的服务注册与服务发现功能，基于zk
