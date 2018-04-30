@@ -46,14 +46,14 @@ public interface HelloServiceAsync extends HelloService {
     void sayHelloAsync(String name, RpcInvocationCallback clientCallback);
 
     @AsyncRpcMethod(origin = "sayHello", type =  AsyncRpcMethodType.FUTURE)
-    Future sayHelloAsync(String name);
+    ListenableFuture sayHelloAsync(String name);
 }
 ```
 
 注解`@AsyncRpc`用于标识一个接口中定义了异步RPC接口方法，同时需要配合注解`@AsyncRpcMethod`对接口方法进行标识，标识该接口方法为异步PRC接口， `@AsyncRpcMethod`注解中的配置如下所示：
 
 - origin : 指定原接口方法名
-- type : 异步RPC接口方式，目前支持客户端提供callback方式和返回java Future方式
+- type : 异步RPC接口方式，目前支持客户端提供callback方式和返回guava ListenableFuture方式
 
 最后附上一个使用demo:
 
@@ -79,8 +79,9 @@ asyncInterface.sayHelloAsync("CrazyPig", new RpcInvocationCallback<String>() {
 });
 
 // future方式调用
-Future<String> future = asyncInterface.sayHelloAsync("CrazyPig");
+ListenableFuture<String> future = asyncInterface.sayHelloAsync("CrazyPig");
 // future.get(); 
+// or using Futures.addCallback(future, callback, executor)
 ```
 
 ## Getting Start
