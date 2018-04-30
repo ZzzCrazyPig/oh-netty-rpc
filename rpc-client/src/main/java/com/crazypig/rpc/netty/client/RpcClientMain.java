@@ -1,7 +1,6 @@
 package com.crazypig.rpc.netty.client;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +9,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.crazypig.rpc.netty.asyncservice.HelloServiceAsync;
 import com.crazypig.rpc.netty.client.stub.async.RpcInvocationCallback;
 import com.crazypig.rpc.netty.service.HelloService;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class RpcClientMain {
 	
@@ -45,9 +45,10 @@ public class RpcClientMain {
             }
         });
 		
-		Future<String> future = helloServiceAsync.sayHelloAgainAsync("CrazyPig asyncByFuture ", 1314);
+		ListenableFuture<String> future = helloServiceAsync.sayHelloAgainAsync("CrazyPig asyncByFuture ", 1314);
 		
 		try {
+//		    Futures.addCallback(future, callback);
 		    String asyncFutureResult = future.get();
 		    logger.info("get async future result : {}", asyncFutureResult);
         } catch (InterruptedException e) {
