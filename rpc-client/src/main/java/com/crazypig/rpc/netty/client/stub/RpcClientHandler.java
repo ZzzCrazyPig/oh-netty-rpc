@@ -1,6 +1,8 @@
 package com.crazypig.rpc.netty.client.stub;
 
-import com.crazypig.rpc.netty.client.stub.async.RpcResponseFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.crazypig.rpc.netty.protocol.RpcResponse;
 
 import io.netty.channel.Channel;
@@ -15,14 +17,27 @@ import io.netty.channel.ChannelHandler.Sharable;
  */
 @Sharable
 public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
+    
+    private static Logger logger = LoggerFactory.getLogger(RpcClientHandler.class);
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
         // rpc服务端返回的结果, 设置future done
     	Channel channel = ctx.channel();
     	RpcConnection rpcConnection = channel.attr(RpcConnection.ATTR_KEY).get();
-        RpcResponseFuture rpcRespFuture = rpcConnection.getRpcRespFutureMap().get(response.getRequestId());
-        rpcRespFuture.setDone(response);
+    	rpcConnection.onRpcRequestDone(response);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        logger.error(cause.getMessage(), cause);
+        Channel ch = ctx.channel();
+        RpcConnection rpcConn = ch.attr(RpcConnection.ATTR_KEY).get();
+        if (rpcConn != null) {
+            rpcConn.close(true);
+        } else {
+            logger.warn("no rpc connection bind!");
+        }
     }
     
 }

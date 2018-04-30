@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.crazypig.rpc.netty.client.stub.async.RpcResponseFuture;
 import com.crazypig.rpc.netty.protocol.RpcRequest;
+import com.crazypig.rpc.netty.protocol.RpcResponse;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -61,6 +62,13 @@ public final class RpcConnection implements Closeable {
         return rpcRespFuture;
     }
     
+    public void onRpcRequestDone(RpcResponse rpcResponse) {
+        RpcResponseFuture rpcRespFuture = rpcRespFutureMap.get(rpcResponse.getRequestId());
+        if (rpcRespFuture != null) {
+            rpcRespFuture.setDone(rpcResponse);
+        }
+    }
+    
     /**
      * RpcConnection close调用, 回收到连接池里
      */
@@ -100,9 +108,5 @@ public final class RpcConnection implements Closeable {
     public int getPort() {
         return port;
     }
-    
-	public ConcurrentMap<String, RpcResponseFuture> getRpcRespFutureMap() {
-		return rpcRespFutureMap;
-	}
 
 }
