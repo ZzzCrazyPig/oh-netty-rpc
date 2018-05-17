@@ -49,7 +49,7 @@ public class KryoRpcSerializer implements RpcSerializer {
         } finally {
             kryoPool.release(kryo);
         }
-        return output.getBuffer();
+        return output.toBytes();
     }
 
     @Override
